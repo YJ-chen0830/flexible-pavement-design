@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柔性鋪面結構設計 | Flexible Pavement Design</title>
+<script src="https://yj-chen0830.github.io/jrh-core/jrh-core.js?v=3" defer></script>
+<style>
+  :root{--navy:#0b1f3a;--navy2:#13284a;--gold:#c9a14a;--gold2:#e0bf6e;--bg:#f5f3ee;--ink:#1c2530;--line:#d8d2c2;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Noto Sans TC","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#f5f3ee;padding:28px 32px;}
+  header h1{margin:0;font-size:22px;}
+  header span{color:var(--gold2);font-size:13px;display:block;margin-top:4px;}
+  main{max-width:1120px;margin:0 auto;padding:28px 20px 60px;}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:24px;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+  .card h2{font-size:14.5px;margin:0 0 18px;color:var(--navy);font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--gold);padding-bottom:10px;}
+  label{display:block;font-size:12px;color:#666;margin:10px 0 4px;font-weight:500;}
+  input,select{width:100%;padding:8px 11px;border:1.5px solid var(--line);border-radius:7px;font-size:13.5px;background:#fafaf8;}
+  input:focus,select:focus{outline:none;border-color:var(--gold);}
+  .sec{font-size:12px;font-weight:700;color:var(--navy);margin:16px 0 6px;border-left:4px solid var(--gold);padding-left:9px;letter-spacing:.04em;text-transform:uppercase;}
+  .note{font-size:11.5px;color:#555;margin-top:12px;line-height:1.75;background:#f9f7f2;border-radius:6px;padding:9px 12px;}
+  .hint{font-size:11px;color:#8a7c55;margin-top:4px;}
+  button.calc-btn{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.calc-btn:hover{background:var(--navy2);}
+  button.pro-btn{margin-top:12px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.pro-btn:hover{filter:brightness(1.08);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:var(--navy);color:#f5f3ee;font-weight:600;font-size:12px;padding:9px 10px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:nth-child(even) td{background:#f9f7f3;}
+  td:last-child{text-align:right;font-weight:700;}
+  .ok{color:#1a7d3a;font-weight:700;}
+  .ng{color:#c0392b;font-weight:700;}
+  details.proc{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;overflow:hidden;}
+  details.proc summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:13px;color:var(--navy);user-select:none;list-style:none;display:flex;align-items:center;gap:6px;}
+  details.proc summary::before{content:"▶";font-size:10px;transition:transform .2s;}
+  details[open].proc summary::before{transform:rotate(90deg);}
+  details.proc pre{margin:0;padding:12px 16px 16px;font-family:"Courier New",monospace;font-size:11.5px;line-height:1.85;white-space:pre-wrap;color:#2c3e50;border-top:1px solid var(--line);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  @media(max-width:640px){.row2,.row3{grid-template-columns:1fr;}}
+  .proj-section{background:#fff;border:1px solid var(--gold);border-radius:10px;padding:18px 22px;margin-bottom:20px;}
+  .proj-section h3{margin:0 0 12px;color:var(--navy);font-size:14px;font-weight:700;}
+  .proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:600px){.proj-grid{grid-template-columns:1fr;}}
+  .mob-tabs{display:none;}
+  .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:700px){.result-grid{grid-template-columns:1fr;}}
+  .metric{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:#fcfbf8;}
+  .metric .k{font-size:11px;color:#6c6758;margin-bottom:6px;}
+  .metric .v{font-size:21px;font-weight:800;color:var(--navy);}
+  .metric .s{font-size:11px;color:#777;margin-top:4px;line-height:1.5;}
+  .mini{font-size:12px;color:#6b6b6b;}
+  .formula{font-family:"Courier New",monospace;font-size:12px;color:#243247;background:#f5f4ef;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;line-height:1.7;}
+  @media screen and (max-width:767px){
+    .mob-tabs{display:flex;background:var(--bg);border-bottom:2px solid var(--line);margin:0 -20px 0;padding:0 20px;}
+    .mob-tab{flex:1;padding:11px 4px;text-align:center;font-size:13.5px;font-weight:700;color:#888;cursor:pointer;background:transparent;border:none;border-bottom:3px solid transparent;}
+    .mob-tab.active{color:var(--navy);border-bottom-color:var(--gold);}
+    .grid{display:block;}
+    .grid>.card{display:none;}
+    .grid>.card.mob-active{display:block;}
+  }
+  @media print{
+    header,.no-print{display:none!important;}
+    body{background:#fff;margin:0;font-size:9pt;line-height:1.5;color:#111;}
+    main{padding:0;max-width:100%!important;}
+    .grid{grid-template-columns:1fr!important;gap:10pt!important;}
+    .card{box-shadow:none!important;border:1px solid #ccc!important;border-radius:4pt!important;padding:10pt 12pt!important;break-inside:avoid;}
+    .card h2{font-size:10.5pt!important;padding-bottom:6pt!important;margin-bottom:9pt!important;}
+    label{font-size:8pt!important;margin:6pt 0 2pt!important;}
+    .sec{font-size:8pt!important;margin:10pt 0 4pt!important;}
+    .note,.hint,.mini{font-size:7.5pt!important;padding:6pt 9pt!important;}
+    table{border:1px solid #bbb!important;border-radius:0!important;margin-top:6pt!important;}
+    th{font-size:8pt!important;padding:5pt 7pt!important;background:#0b1f3a!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    td{font-size:8.5pt!important;padding:5pt 7pt!important;}
+    tr:nth-child(even) td{background:#f5f5f5!important;}
+    details.proc{display:block!important;margin-top:10pt!important;border:1pt solid #0b1f3a!important;border-radius:4pt!important;break-inside:avoid;background:#f9f9f6!important;}
+    details.proc>summary{display:none!important;}
+    details.proc::before{content:"📋  計算過程（供第三方檢核）";display:block;font-weight:700;font-size:8pt;color:#0b1f3a;padding:6pt 10pt 4pt;border-bottom:1px solid #ccc;letter-spacing:.04em;}
+    details.proc>pre{font-size:7pt!important;line-height:1.65!important;white-space:pre-wrap!important;padding:6pt 10pt 10pt!important;color:#1a1a1a!important;font-family:"Courier New",monospace!important;}
+    .proj-section{border:1.5pt solid #0b1f3a!important;border-radius:4pt!important;}
+    .metric{break-inside:avoid;}
+    button.pro-btn,button.calc-btn{display:none!important;}
+    @page{margin:15mm 12mm;size:A4;}
+  }
+</style>
+</head>
+<body data-tool="fpd">
+<header>
+  <a href="https://yj-chen0830.github.io/engineering-hub/" style="color:var(--gold2);font-size:12.5px;text-decoration:none;display:inline-block;margin-bottom:8px;">← 返回工程計算中心</a>
+  <h1>🛣️ 柔性鋪面結構設計（AASHTO 1993法）</h1>
+  <span>AASHTO 1993 Guide for Design of Pavement Structures · SN 疊代求解 · 面層厚度反算</span>
+</header>
+<main>
+
+<div class="proj-section no-print" id="projSection">
+  <h3>📁 專案資訊（列印時帶入計算書封面）</h3>
+  <div class="proj-grid">
+    <div><label>工程名稱</label><input id="pj-name" placeholder="○○道路改善工程"></div>
+    <div><label>工程地點</label><input id="pj-loc" placeholder="○○市○○區"></div>
+    <div><label>承造廠商</label><input id="pj-contractor" placeholder="○○營造股份有限公司"></div>
+    <div><label>文件編號</label><input id="pj-docno" placeholder="FPD-CAL-001"></div>
+    <div><label>計算者</label><input id="pj-calc" placeholder="姓名"></div>
+    <div><label>審核者</label><input id="pj-review" placeholder="姓名"></div>
+    <div><label>計算日期</label><input id="pj-date" type="date"></div>
+  </div>
+</div>
+
+<div class="mob-tabs">
+  <button class="mob-tab active" onclick="switchMobTab('fpd-in',this)">📋 輸入參數</button>
+  <button class="mob-tab" id="mobTab-fpd-r" onclick="switchMobTab('fpd-r',this)">📊 計算結果</button>
+</div>
+
+<div class="grid">
+  <div class="card mob-active" data-tab="fpd-in">
+    <h2>設計輸入</h2>
+
+    <div class="sec">交通與可靠度</div>
+    <label>設計期間累積 18 kip 等效單軸載重 W18 (次)</label>
+    <input id="fpd-w18" type="number" value="5000000" min="1" step="1000">
+    <div class="hint">可由 AADT × 成長率 × 卡車比例 × 等效係數概估，亦可直接輸入設計值。</div>
+
+    <div class="row2">
+      <div>
+        <label>可靠度 R / 標準常態離差 ZR</label>
+        <select id="fpd-reliability">
+          <option value="-1.282" selected>R = 90% → ZR = -1.282</option>
+          <option value="-1.645">R = 95% → ZR = -1.645</option>
+          <option value="-1.037">R = 85% → ZR = -1.037</option>
+          <option value="-0.841">R = 80% → ZR = -0.841</option>
+        </select>
+      </div>
+      <div>
+        <label>綜合標準差 So</label>
+        <input id="fpd-so" type="number" value="0.45" min="0.1" max="1" step="0.01">
+      </div>
+    </div>
+
+    <div class="sec">服務性與路基</div>
+    <div class="row2">
+      <div><label>初始服務性 p0</label><input id="fpd-p0" type="number" value="4.2" min="2" max="5" step="0.1"></div>
+      <div><label>終期服務性 pt</label><input id="fpd-pt" type="number" value="2.5" min="1" max="4" step="0.1"></div>
+    </div>
+    <div class="row2">
+      <div><label>路基回彈模數 MR (psi)</label><input id="fpd-mr" type="number" value="5000" min="1000" step="100"></div>
+      <div><label>CBR（若要概估 MR，可填）</label><input id="fpd-cbr" type="number" value="" min="1" step="0.5" placeholder="例如 3.3"></div>
+    </div>
+    <div class="hint">AASHTO 原式採英制；若由 CBR 概估，可用 MR ≈ 1500 × CBR。</div>
+
+    <div class="sec">材料結構係數</div>
+    <div class="row2">
+      <div><label>瀝青混凝土面層 a1 (per inch)</label><input id="fpd-a1" type="number" value="0.44" min="0.01" step="0.01"></div>
+      <div><label>基層 a2 (per inch)</label><input id="fpd-a2" type="number" value="0.14" min="0.01" step="0.01"></div>
+    </div>
+    <div class="row2">
+      <div><label>基層排水係數 m2</label><input id="fpd-m2" type="number" value="1" min="0.4" step="0.05"></div>
+      <div><label>底基層 a3 (per inch)</label><input id="fpd-a3" type="number" value="0.11" min="0.01" step="0.01"></div>
+    </div>
+    <div class="row2">
+      <div><label>底基層排水係數 m3</label><input id="fpd-m3" type="number" value="1" min="0.4" step="0.05"></div>
+      <div></div>
+    </div>
+
+    <div class="sec">厚度配置</div>
+    <div class="row2">
+      <div><label>基層厚度 D2 (inch)</label><input id="fpd-d2" type="number" value="8" min="0" step="0.5"></div>
+      <div><label>底基層厚度 D3 (inch)</label><input id="fpd-d3" type="number" value="6" min="0" step="0.5"></div>
+    </div>
+    <div class="note">本工具全程採英制計算：厚度用 inch、回彈模數用 psi。公制換算：1 inch = 25.4 mm。若反算結果 D1 小於 0，表示目前 D2 與 D3 組合已超過所需 SN。</div>
+
+    <button class="calc-btn" onclick="calcFPD()">計算柔性鋪面設計</button>
+  </div>
+
+  <div class="card" data-tab="fpd-r">
+    <h2>設計結果</h2>
+    <div id="fpd-result"><p style="color:#888">尚未計算</p></div>
+    <details class="proc" id="fpd-proc" style="display:none">
+      <summary>📋 計算過程（供第三方檢核）</summary>
+      <pre id="fpd-proc-text"></pre>
+    </details>
+    <button class="pro-btn no-print" onclick="openPro()">📄 產出計算書 PDF</button>
+  </div>
+</div>
+
+</main>
+<script>
+function switchMobTab(name,btn){
+  btn.parentElement.querySelectorAll('.mob-tab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  btn.parentElement.nextElementSibling.querySelectorAll('.card').forEach(function(c){
+    c.classList.toggle('mob-active',c.dataset.tab===name);
+  });
+}
+function openPro(){ JRH.checkEmail(function(){ jrhPrint('柔性鋪面結構設計計算書'); }); }
+function v(id){return parseFloat(document.getElementById(id).value)||0;}
+function txt(id){return document.getElementById(id).value;}
+function f2(x){return Number(x).toFixed(2);}
+function f3(x){return Number(x).toFixed(3);}
+function f4(x){return Number(x).toFixed(4);}
+function f6(x){return Number(x).toFixed(6);}
+
+document.getElementById('fpd-cbr').addEventListener('change',function(){
+  var cbr=parseFloat(this.value);
+  if(cbr>0){
+    document.getElementById('fpd-mr').value=(1500*cbr).toFixed(0);
+  }
+});
+
+function aashtoLogW18(sn,zr,so,dpsi,mr){
+  return zr*so + 9.36*Math.log10(sn+1) - 0.20 + (Math.log10(dpsi/(4.2-1.5))) / (0.40 + 1094/Math.pow(sn+1,5.19)) + 2.32*Math.log10(mr) - 8.07;
+}
+
+function calcFPD(){
+  var w18=v('fpd-w18');
+  var zr=parseFloat(txt('fpd-reliability'));
+  var so=v('fpd-so');
+  var p0=v('fpd-p0');
+  var pt=v('fpd-pt');
+  var mr=v('fpd-mr');
+  var a1=v('fpd-a1');
+  var a2=v('fpd-a2');
+  var m2=v('fpd-m2');
+  var a3=v('fpd-a3');
+  var m3=v('fpd-m3');
+  var d2=v('fpd-d2');
+  var d3=v('fpd-d3');
+
+  if(w18<=0 || mr<=0 || a1<=0){
+    alert('W18、MR 與 a1 需大於 0。');
+    return;
+  }
+  if(pt>=p0){
+    alert('終期服務性 pt 必須小於初始服務性 p0，否則 ΔPSI 無法成立。');
+    return;
+  }
+
+  var dpsi=p0-pt;
+  var target=Math.log10(w18);
+  var lo=0.1, hi=20.0, tol=1e-10, maxIter=200;
+  var fLo=aashtoLogW18(lo,zr,so,dpsi,mr)-target;
+  var fHi=aashtoLogW18(hi,zr,so,dpsi,mr)-target;
+
+  if(fLo*fHi>0){
+    alert('SN 搜尋區間內未形成夾根，請檢查輸入參數。');
+    return;
+  }
+
+  var iterRows=[];
+  var mid=0, fMid=0, it=0;
+  for(it=1;it<=maxIter;it++){
+    mid=(lo+hi)/2;
+    fMid=aashtoLogW18(mid,zr,so,dpsi,mr)-target;
+    if(it<=12 || Math.abs(fMid)<1e-6 || it===maxIter){
+      iterRows.push({it:it,lo:lo,hi:hi,mid:mid,f:fMid});
+    }
+    if(Math.abs(fMid)<tol){break;}
+    if(fLo*fMid<=0){
+      hi=mid;
+      fHi=fMid;
+    }else{
+      lo=mid;
+      fLo=fMid;
+    }
+  }
+
+  var sn=mid;
+  var baseSN=a2*d2*m2 + a3*d3*m3;
+  var d1=(sn-baseSN)/a1;
+  var d1mm=d1*25.4;
+  var providedSN=a1*d1 + baseSN;
+  var okD1=d1>=0;
+
+  var resultHtml='';
+  resultHtml+='<div class="result-grid">';
+  resultHtml+='<div class="metric"><div class="k">結構係數需求</div><div class="v">SN = '+f4(sn)+'</div><div class="s">以二分法求解 AASHTO 1993 方程式，收斂於第 '+it+' 次迭代。</div></div>';
+  resultHtml+='<div class="metric"><div class="k">面層所需厚度</div><div class="v">'+f3(d1)+' in</div><div class="s">'+f1mm(d1mm)+' mm'+(okD1?'':'；目前 D2/D3 已足夠，理論反算值為負。')+'</div></div>';
+  resultHtml+='</div>';
+  resultHtml+='<table><tr><th>項目</th><th>數值</th></tr>';
+  resultHtml+='<tr><td>W18</td><td>'+numFmt(w18)+' 次</td></tr>';
+  resultHtml+='<tr><td>ZR</td><td>'+f3(zr)+'</td></tr>';
+  resultHtml+='<tr><td>ΔPSI = p0 - pt</td><td>'+f3(dpsi)+'</td></tr>';
+  resultHtml+='<tr><td>MR</td><td>'+numFmt(mr)+' psi</td></tr>';
+  resultHtml+='<tr><td>既有基層+底基層貢獻</td><td>'+f4(baseSN)+'</td></tr>';
+  resultHtml+='<tr><td>反算面層厚度 D1</td><td>'+f3(d1)+' inch / '+f1mm(d1mm)+' mm '+(okD1?'<span class="ok">OK</span>':'<span class="ng">檢核</span>')+'</td></tr>';
+  resultHtml+='<tr><td>回代 SN = a1D1 + a2D2m2 + a3D3m3</td><td>'+f4(providedSN)+'</td></tr>';
+  resultHtml+='</table>';
+  resultHtml+='<div class="sec" style="margin-top:18px">設計公式</div>';
+  resultHtml+='<div class="formula">log10(W18) = ZR·So + 9.36·log10(SN+1) - 0.20 + [log10(ΔPSI/(4.2-1.5))] / (0.40 + 1094/(SN+1)^5.19) + 2.32·log10(MR) - 8.07<br>SN = a1·D1 + a2·D2·m2 + a3·D3·m3</div>';
+  resultHtml+='<div class="mini" style="margin-top:10px">單位提醒：本頁依 AASHTO 原式採 inch、psi；毫米換算僅供厚度閱讀。</div>';
+  document.getElementById('fpd-result').innerHTML=resultHtml;
+
+  var proc='';
+  proc+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  proc+='  柔性鋪面結構設計計算過程（AASHTO 1993）\n';
+  proc+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  proc+='【輸入】\n';
+  proc+='  W18 = '+numFmt(w18)+' 次\n';
+  proc+='  R 對應 ZR = '+f3(zr)+'，So = '+f3(so)+'\n';
+  proc+='  p0 = '+f3(p0)+'，pt = '+f3(pt)+'，ΔPSI = p0 - pt = '+f3(dpsi)+'\n';
+  proc+='  MR = '+numFmt(mr)+' psi\n';
+  proc+='  a1 = '+f3(a1)+' /in，a2 = '+f3(a2)+' /in，m2 = '+f3(m2)+'，a3 = '+f3(a3)+' /in，m3 = '+f3(m3)+'\n';
+  proc+='  D2 = '+f3(d2)+' in，D3 = '+f3(d3)+' in\n\n';
+  proc+='【一】AASHTO 1993 設計方程式\n';
+  proc+='  log10(W18) = ZR×So + 9.36×log10(SN+1) - 0.20\n';
+  proc+='              + [log10(ΔPSI/(4.2-1.5))] / (0.40 + 1094/(SN+1)^5.19)\n';
+  proc+='              + 2.32×log10(MR) - 8.07\n';
+  proc+='  目標值 log10(W18) = log10('+numFmt(w18)+') = '+f6(target)+'\n';
+  proc+='  固定項 ZR×So = '+f3(zr)+'×'+f3(so)+' = '+f6(zr*so)+'\n';
+  proc+='  固定項 2.32×log10(MR)-8.07 = 2.32×log10('+numFmt(mr)+')-8.07 = '+f6(2.32*Math.log10(mr)-8.07)+'\n';
+  proc+='  修正項 log10(ΔPSI/(4.2-1.5)) = log10('+f3(dpsi)+'/2.7) = '+f6(Math.log10(dpsi/(4.2-1.5)))+'\n\n';
+  proc+='【二】二分法疊代摘要（SN ∈ 0.1 ~ 20）\n';
+  proc+='  定義 F(SN) = AASHTO右式 - log10(W18)\n';
+  proc+='  初始 F(0.1) = '+f6(aashtoLogW18(0.1,zr,so,dpsi,mr)-target)+'\n';
+  proc+='  初始 F(20.0) = '+f6(aashtoLogW18(20,zr,so,dpsi,mr)-target)+'\n';
+  iterRows.forEach(function(r){
+    proc+='  Iter '+String(r.it).padStart(3,' ')+' : lo='+f6(r.lo)+' , hi='+f6(r.hi)+' , mid='+f6(r.mid)+' , F(mid)='+f6(r.f)+'\n';
+  });
+  proc+='  收斂條件 |F(mid)| < '+tol.toExponential(1)+'\n';
+  proc+='  收斂結果 SN = '+f6(sn)+'（第 '+it+' 次迭代）\n\n';
+  proc+='【三】分層厚度反算\n';
+  proc+='  SN = a1×D1 + a2×D2×m2 + a3×D3×m3\n';
+  proc+='  基層+底基層貢獻 = '+f3(a2)+'×'+f3(d2)+'×'+f3(m2)+' + '+f3(a3)+'×'+f3(d3)+'×'+f3(m3)+' = '+f6(baseSN)+'\n';
+  proc+='  D1 = (SN - a2×D2×m2 - a3×D3×m3) / a1\n';
+  proc+='     = ('+f6(sn)+' - '+f6(baseSN)+') / '+f3(a1)+'\n';
+  proc+='     = '+f6(d1)+' inch = '+f3(d1mm)+' mm\n';
+  proc+='  回代 SN = '+f3(a1)+'×'+f6(d1)+' + '+f6(baseSN)+' = '+f6(providedSN)+'\n\n';
+  proc+='【四】說明\n';
+  proc+='  1 inch = 25.4 mm\n';
+  proc+='  本工具為 AASHTO 1993 柔性鋪面初步設計計算；材料係數、排水係數與交通預估仍須由設計者判定。\n';
+  proc+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+
+  document.getElementById('fpd-proc-text').textContent=proc;
+  document.getElementById('fpd-proc').style.display='';
+  if(window.innerWidth<768){var b=document.getElementById('mobTab-fpd-r');if(b)switchMobTab('fpd-r',b);}
+}
+
+function numFmt(x){return Number(x).toLocaleString('en-US');}
+function f1mm(x){return Number(x).toFixed(1);}
+
+calcFPD();
+</script>
+<script>
+window.jrhDocMeta={
+  "doc":"柔性鋪面結構設計計算書",
+  "codes":[
+    "AASHTO (1993), Guide for Design of Pavement Structures",
+    "柔性鋪面結構設計常用結構係數與排水係數經驗值"
+  ],
+  "notes":[
+    "本工具依 AASHTO 1993 柔性鋪面設計方程式，以二分法求解所需結構係數 SN，供初步配置參考。",
+    "W18、可靠度、服務性損失、路基回彈模數與各層結構係數，均應由實際交通預測、材料試驗與設計規範核定。",
+    "AASHTO 原始設計式採英制，本工具全程使用 inch 與 psi；顯示之毫米數值僅供閱讀換算。",
+    "若需考慮分期施工、特殊材料、凍脹、疲勞/車轍性能或機場道面等情境，應採更完整之鋪面設計程序另行檢討。",
+    "本計算結果應由合格道路/鋪面工程專業人員複核後，始得作為正式設計或送審文件。"
+  ]
+};
+</script>
+</body>
+</html>
